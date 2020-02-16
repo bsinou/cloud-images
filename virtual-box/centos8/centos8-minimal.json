@@ -1,0 +1,59 @@
+{
+  "variables": {
+    "vmname": "centos8",
+    "product_name": "Base CentOS 8 Appliance",
+    "product_description": "Base appliance with up-to-date software and necessary dependencies to build ovf business appliances",
+    "product_url": "https://github.com/bsinou",
+    "product_version": "0.1",
+
+    "ssh_name": "root",
+    "ssh_pass": "root"
+  },
+  "builders": [
+    {
+
+      "guest_os_type": "RedHat_64",
+      "type": "virtualbox-iso",
+      "vm_name": "{{user `vmname`}}",
+      "format": "ova",
+      "output_directory": "{{user `vmname`}}",
+      "disc_size": 8196,
+
+      "headless": true,
+     
+      "iso_url": "http://mirrors.ircam.fr/pub/CentOS/8/isos/x86_64/CentOS-8.1.1911-x86_64-boot.iso",
+      "iso_checksum": "7fea13202bf2f26989df4175aace8fdc16e1137f7961c33512cbfad844008948",
+      "iso_checksum_type": "sha256",
+      "ssh_username": "{{user `ssh_name`}}",
+      "ssh_password": "{{user `ssh_pass`}}",
+      "ssh_wait_timeout": "30m",
+      "boot_wait": "3s",
+      "vboxmanage": [
+          ["modifyvm", "{{.Name}}", "--memory", "4096"],
+          ["modifyvm", "{{.Name}}", "--cpus", "2"],
+          ["modifyvm", "{{.Name}}", "--audio", "none"],
+          ["modifyvm", "{{.Name}}", "--vram", "32"],
+          ["modifyvm", "{{.Name}}", "--usb", "off"],
+          ["modifyvm", "{{.Name}}", "--usbxhci", "off"],
+          ["modifyvm", "{{.Name}}", "--usbehci", "off"],
+          ["modifyvm", "{{.Name}}", "--usbcardreader", "off"],
+          ["modifyvm", "{{.Name}}", "--vrde", "on"]
+        ],
+      "vboxmanage_post": [
+        ],
+      "http_directory": "http",
+      "boot_command": [
+        "<tab>linux ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "shutdown_command": "echo 'root' | sudo -S shutdown -P now",
+      "export_opts": [
+        "--vsys", "0",
+        "--options", "manifest,nomacs",
+        "--manifest",
+        "--product", "{{user `product_name`}}",
+        "--version", "{{user `product_version`}}",
+        "--description","{{user `product_description`}}"
+      ]
+    }
+  ]
+}
